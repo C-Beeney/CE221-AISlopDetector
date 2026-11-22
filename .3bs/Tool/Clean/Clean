@@ -1,0 +1,6 @@
+#!/bin/bash
+
+source .3bs/*essential.sh
+
+rm -fr Binary Object Temp Dependency
+# Clean logic here

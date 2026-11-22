@@ -1,0 +1,10 @@
+# 3bs related rules
+.3bs/Temp/
+Build/
+Object/
+Dependency/
+.DS_Store
+.DS_Store/
+*.DS_Store/
+*.DS_Store
+.vscode/

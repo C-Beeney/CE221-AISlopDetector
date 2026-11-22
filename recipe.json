@@ -1,0 +1,32 @@
+{
+    "name" : "AISlopDetector",
+
+    "comp" : { "AISlopDetector" : ["$Application", "$View", "$SlopDictionary",
+                                       "main.cxx", "$ModelDefault"],
+               "Application"    : ["Application/"],
+               "View"           : ["View/CLI/", "View/View.cxx"],
+               "SlopDictionary" : ["Model/SlopDictionary/"],
+               "ModelDefault"   : ["Model/Model.cxx"]
+             },
+
+    "flag" : { "$AISlopDetector" : ["-Wall", "-Wextra", "-pedantic", "-O0",
+                                       "-g", "-fno-omit-frame-pointer", "-std=c++23", "-DCOMPLY_WITH_ASSIGNMENT"],
+                "$Application" : ["-Wall", "-Wextra", "-pedantic", "-O0",
+                                       "-g", "-fno-omit-frame-pointer", "-std=c++23", "-DCOMPLY_WITH_ASSIGNMENT"],
+                "$View" : ["-Wall", "-Wextra", "-pedantic", "-O0",
+                                       "-g", "-fno-omit-frame-pointer", "-std=c++23", "-DCOMPLY_WITH_ASSIGNMENT"],
+                "$SlopDictionary" : ["-Wall", "-Wextra", "-pedantic", "-O0",
+                                       "-g", "-fno-omit-frame-pointer", "-std=c++23", "-DCOMPLY_WITH_ASSIGNMENT"],
+                "$ModelDefault" : ["-Wall", "-Wextra", "-pedantic", "-O0",
+                                       "-g", "-fno-omit-frame-pointer", "-std=c++23", "-DCOMPLY_WITH_ASSIGNMENT"]
+             },
+
+    "link" : { "$AISlopDetector" : ["-flto", "-fsanitize=address,undefined"]
+             },
+
+    "tool" : { "compiler" : "c++",
+               "linker"   : "c++"
+             },
+
+    "deps" : { "gh" : ["martinus/unordered_dense"] }
+}

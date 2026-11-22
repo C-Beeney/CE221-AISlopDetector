@@ -1,0 +1,56 @@
+: '############################################################################'
+: '# Copyright (c) 2026 Connor R. Beeney                                      #'
+: '#                                                                          #'
+: '# Permission to use, copy, modify, and/or distribute this software for     #'
+: '# any purpose with or without fee is hereby granted.                       #'
+: '#                                                                          #'
+: '# THE SOFTWARE IS PROVIDED “AS IS” AND THE AUTHOR DISCLAIMS ALL            #'
+: '# WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES #'
+: '# OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE   #'
+: '# FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY       #'
+: '# DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER  #'
+: '# IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING   #'
+: '# OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.    #'
+: '############################################################################'
+
+. .3bs/*essential.sh
+
+here="`readlink -f $(dirname ${BASH_SOURCE[0]})`"
+this="`basename ${BASH_SOURCE[0]} .util.sh`"
+
+set -e
+
+if test -n "$1"
+then
+    repopath="$1"
+else
+    repopath="."
+fi
+
+hash="`cat .3bs/Asset/current.ver`"
+
+: "children"
+git -C "$repopath" rev-list --all --ancestry-path $hash..HEAD | sort > temp1.dat
+
+: "significant"
+git -C "$repopath" show-ref --hash | sort > temp2.dat
+
+update_paths="`comm -12 temp1.dat temp2.dat`"
+
+annotated_paths="`echo $update_paths | git name-rev --annotate-stdin | nl -w2 -s' -> '`"
+
+if test -z "$update_paths"
+then
+    _DisplayInfo "No updates available" | tee /dev/tty > /dev/null
+    exit 0
+fi
+
+echo "$annotated_paths" | sed 's/(/\| /g;s|/[^| ]*/|/|g;s|[^| ]*/||g;s/)//g' 1>&2
+
+_DisplayInfo "Which branch do you wish to update to: " --no-newline 1>&2
+read -r answer
+branch=${update_paths[answer-1]}
+
+_DisplayTrace "selecting branch: $branch" 1>&2   # log to stderr so it doesn't go to caller
+
+echo "$branch"

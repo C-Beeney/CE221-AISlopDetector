@@ -1,0 +1,71 @@
+: '############################################################################'
+: '# Copyright (c) 2026 Connor R. Beeney                                      #'
+: '#                                                                          #'
+: '# Permission to use, copy, modify, and/or distribute this software for     #'
+: '# any purpose with or without fee is hereby granted.                       #'
+: '#                                                                          #'
+: '# THE SOFTWARE IS PROVIDED “AS IS” AND THE AUTHOR DISCLAIMS ALL            #'
+: '# WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES #'
+: '# OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE   #'
+: '# FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY       #'
+: '# DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER  #'
+: '# IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING   #'
+: '# OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.    #'
+: '############################################################################'
+
+set -eu
+
+. .3bs/*essential.sh
+
+# If we are in dev-test mode, enable debug and shift args
+devtoggle=""
+if test "x${1-}" = "xdev-test"
+then
+    devtoggle="$1"
+    shift
+    set -xe
+else
+    set -e
+fi
+
+# Translate CLI arg to function call
+case "$1" in
+    "build" )
+        shift && . .3bs/Tool/Build/Build $devtoggle $@
+        ;;
+    "run")
+        shift && . .3bs/Tool/Run/Run $devtoggle $@
+        ;;
+    "test" )
+        shift && _DisplayError "NOT IMPLEMENTED YET!" && exit 1
+        ;;
+    "help" )
+        shift
+        echo "Available commands:"
+        echo "  build               Build the project"
+        echo "  run                 Run the project"
+        echo "  test                Run tests"
+        echo "  help                Show this help message"
+        echo "  clean               Clean build artifacts"
+        echo "  update              Update dependencies"
+        echo "  version             Show version information"
+        echo "  get-dependencies    Get project dependencies"
+        ;;
+    "clean" )
+        shift && . .3bs/Tool/Clean/Clean $devtoggle $@
+        ;;
+    "update" )
+        shift && . .3bs/Tool/Update/Update $devtoggle $@
+        ;;
+    "version" )
+        shift && _DisplayInfo "Version: `cat .3bs/Asset/current.ver`"
+        ;;
+    "get-dependencies" )
+        shift && . .3bs/Tool/GetDependency/GetDependency $devtoggle $@
+        ;;
+    * )
+        _DisplayError "Command not found"
+        _DisplayInfo "Consider running 'sh 3bs help' for valid commands."
+        exit 1
+        ;;
+esac

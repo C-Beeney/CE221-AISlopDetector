@@ -1,0 +1,35 @@
+#!/bin/bash
+
+source .3bs/*essential.sh
+
+APP_ROOT="${APP_ROOT-"`pwd`"}"
+export APP_ROOT
+
+here=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
+
+_DisplayTrace "Retrieving dependencies..."
+_DisplayTrace "Arguments: $@"
+
+rm -fr Dependency/
+
+ConsoleCommands=$(
+    cat "$APP_ROOT/recipe.json" | handlerpath="$APP_ROOT/.3bs/Asset/GetDependency/deps.handler.json" \
+        $here/ResolveConsoleCommands
+)
+
+bash -c "$ConsoleCommands"
+
+for dependency in `ls -A Dependency/`
+do
+    # If a handler exists, it would be at this path
+    handler="${APP_ROOT}/Tool/Dependency/$dependency"
+
+    # Create a temporary directory for a handler to transfer files to & from
+    tmp=$(mktemp -qdt 3bs.dependency.handler.Init.$dependency.XXXXXX)
+    test -z "$tmp" && _DisplayError "temporary directory has not been set!\n\r\tExitting!" && exit 1
+
+    # If a handler exists, run its Init function
+    dep_path="$APP_ROOT/Dependency/$dependency/"
+    export tmp
+    test -f "$handler" && (cd "$dep_path" && . "$handler")
+done

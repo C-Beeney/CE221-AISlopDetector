@@ -1,0 +1,72 @@
+: '############################################################################'
+: '# Copyright (c) 2026 Connor R. Beeney                                      #'
+: '#                                                                          #'
+: '# Permission to use, copy, modify, and/or distribute this software for     #'
+: '# any purpose with or without fee is hereby granted.                       #'
+: '#                                                                          #'
+: '# THE SOFTWARE IS PROVIDED “AS IS” AND THE AUTHOR DISCLAIMS ALL            #'
+: '# WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES #'
+: '# OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE   #'
+: '# FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY       #'
+: '# DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER  #'
+: '# IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING   #'
+: '# OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.    #'
+: '############################################################################'
+
+dev_test=false
+if test "$1" = "dev-test"
+then
+    dev_test=true
+    shift
+    set -xeu
+else
+    set -eu
+fi
+
+APP_ROOT="`pwd`"
+export APP_ROOT
+
+. .3bs/*essential.sh
+
+prohibit_git=false
+for arg in "$@"
+do
+    if test "$arg" = "--prohibit-git"
+    then
+        prohibit_git=true
+        break
+    fi
+done
+
+
+(
+    cd `dirname $0` # Typically .3bs
+
+    . *install.util.sh
+
+    _DisplayTrace 'Installing 3bs into local directory...'
+
+    git rev-parse HEAD > Asset/current.ver
+
+    cp -fa Parent/. ..
+    rm -fr Parent
+)
+
+rm -fr LICENSE README.md devutil .git
+
+if test $dev_test = true
+then
+    : "Remove this install script: typically .3bs/install"
+    rm "$0"
+fi
+
+: "Create a git repository if git is available."
+if command -v git &> /dev/null && test "$prohibit_git" = false
+then
+    _DisplayTrace "Initializing git repository..."
+    git init . --quiet
+else
+    _DisplayInfo "Git not found, or has been prohibited; skipping git repository initialization."
+fi
+
+_DisplayTrace '3bs installed.'
